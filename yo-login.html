@@ -9,7 +9,7 @@
         display: block;
       }
     </style>
-      <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+      <firebase-auth app-name="{{appName}}" id="auth" user="{{user}}" provider="google" on-error="handleError">
       </firebase-auth>
       <paper-button on-tap="sigin" >
         Iniciar sesion
@@ -29,9 +29,102 @@
       static get is() { return 'yo-login'; }
       static get properties() {
         return {
-          prop1: {
-            type: String,
-            value: 'yo-login'
+            /**
+          * `appName` represents the name of the firebase-app that was instantiated
+          */
+          appName: {
+          type: String
+          },
+          /**
+          * `anonymous` represents whether to allow anonymous sign in
+          */
+          anonymous: {
+          type: Boolean,
+          value: false,
+          },
+          /**
+          * `github` represents whether to allow github sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
+          */
+          github: {
+          type: Boolean,
+          value: false,
+          },
+          /**
+          * `twitter` represents whether to allow twitter sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
+          */
+          twitter: {
+          type: Boolean,
+          value: false,
+          },
+          /**
+          * `facebook` represents whether to allow facebook sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
+          */
+          facebook: {
+          type: Boolean,
+          value: false,
+          },
+          /**
+          * `google` represents whether to allow google sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
+          */
+          google: {
+          type: Boolean,
+          value: false,
+          },
+          /**
+          * `redirect` represents whether to use a redirect instead of a popup for signing in with the selected providers
+          */
+          redirect: {
+          type: Boolean,
+          value: false,
+          },
+          /**
+          * `horizontal` represents whether to display the social buttons side by side or on top of each other
+          */
+          horizontal: {
+          type: Boolean,
+          value: false,
+          observer: '_horizontalChanged',
+          },
+          /**
+          * `mini` represents whether to display the social buttons with "Sign in with" or not
+          */
+          mini: {
+          type: Boolean,
+          value: false
+          },
+          /**
+          * `user` represents the user object returned by the firebase-auth element
+          */
+          user: {
+          type: Object,
+          readOnly: true,
+          notify: true,
+          computed: "_computeUser(googleUser, facebookUser, twitterUser, githubUser, anonUser)",
+          observer: "_userChanged",
+          },
+          /**
+          * `signedIn` represents the signed in state returned by the firebase-auth element
+          */
+          signedIn: {
+          type: Boolean,
+          readOnly: true,
+          notify: true,
+          computed: "_computeSignedIn(googleSignedIn, facebookSignedIn, twitterSignedIn, githubSignedIn, anonSignedIn)",
+          },
+          /**
+          * `statusKnown` represents the status known state returned by the firebase-auth element
+          */
+          statusKnown: {
+            type: Boolean,
+            notify: true,
+            computed: "_computeStatusKnown(googleStatusKnown, facebookStatusKnown, twitterStatusKnown, githubStatusKnown, anonStatusKnown)",
+          },
+          /**
+          * `debug` represents if the debug region is shown
+          */
+          debug: {
+          type: Boolean,
+          value: false,
           }
         };
 
