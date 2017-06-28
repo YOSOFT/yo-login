@@ -11,9 +11,32 @@
     </style>
       <firebase-auth app-name="{{appName}}" id="auth" user="{{user}}" provider="google" on-error="handleError">
       </firebase-auth>
-      <paper-button on-tap="sigin" >
-        Iniciar sesion
-      </paper-button>
+
+      <template is="dom-if" if="{{twitter}}">
+        <paper-button on-tap="sigin" >
+        twitter
+        </paper-button>
+      </template>
+      
+      <template is="dom-if" if="{{github}}">
+        <paper-button on-tap="sigin" >
+        github
+        </paper-button>
+      </template>
+
+      <template is="dom-if" if="{{anonymous}}">
+        <paper-button on-tap="sigin" >
+          anonymous
+        </paper-button>
+      </template>
+
+       <template is="dom-if" if="{{facebook}}">
+        <paper-button on-tap="sigin" >
+          facebook
+        </paper-button>
+      </template>
+
+
   </template>
 
   <script>
@@ -132,7 +155,7 @@
       sigin(){
         this.$.auth.signInWithPopup()
         .then(function(response) {// successful authentication response here
-          console.log("sigin", resposnse);  
+          console.log("sigin", response);  
         })
         .catch(function(error) {// unsuccessful authentication response here
           console.log("error",error);
