@@ -1,4 +1,6 @@
 <link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../polymerfire/firebase-auth.html">
 
 <dom-module id="yo-login">
   <template>
@@ -7,7 +9,11 @@
         display: block;
       }
     </style>
-    <h2>Hello [[prop1]]!</h2>
+      <firebase-auth id="auth" user="{{user}}" provider="google" on-error="handleError">
+      </firebase-auth>
+      <paper-button on-tap="sigin" >
+        Iniciar sesion
+      </paper-button>
   </template>
 
   <script>
@@ -28,9 +34,18 @@
             value: 'yo-login'
           }
         };
+
+      }
+      sigin(){
+        this.$.auth.signInWithPopup()
+        .then(function(response) {// successful authentication response here
+          console.log("sigin", resposnse);  
+        })
+        .catch(function(error) {// unsuccessful authentication response here
+          console.log("error",error);
+        });
       }
     }
-
     window.customElements.define(YoLogin.is, YoLogin);
   </script>
 </dom-module>
