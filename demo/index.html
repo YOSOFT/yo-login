@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
     <title>yo-login demo</title>
-
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
+    <link rel="import" href="../../polymerfire/firebase-app.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
     <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../yo-login.html">
@@ -20,9 +19,17 @@
   <body>
     <div class="vertical-section-container centered">
       <h3>Basic yo-login demo</h3>
+      <firebase-app name="yologin"
+            api-key="AIzaSyA6azh_5mugltQvAZiKwjnpGDFmkqzeSWY"
+            auth-domain="dashbig-6edfb.firebaseapp.com"
+            database-url="https://dashbig-6edfb.firebaseio.com"
+            storage-bucket="dashbig-6edfb.appspot.com"
+            messaging-sender-id="655085981041"
+        >
+      </firebase-app>
       <demo-snippet>
         <template>
-          <yo-login></yo-login>
+          <yo-login twitter facebook github google anonymous app-name="yologin" debug></yo-login>
         </template>
       </demo-snippet>
     </div>

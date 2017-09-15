@@ -1,5 +1,6 @@
 <link rel="import" href="../polymer/polymer-element.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../polymerfire/firebase-auth.html">
 
 <dom-module id="yo-login">
@@ -8,35 +9,98 @@
       :host {
         display: block;
       }
+      paper-button{
+        margin: 0;
+      }
+      .errorRegistro{
+        color: red;
+      }
     </style>
-      <firebase-auth app-name="{{appName}}" id="auth" user="{{user}}" provider="google" on-error="handleError">
-      </firebase-auth>
+        <firebase-auth app-name="{{appName}}" id="auth" user="{{user}}" provider="{{provider}}"  sign>
+        </firebase-auth>
 
-      <template is="dom-if" if="{{twitter}}">
-        <paper-button on-tap="sigin" >
-        twitter
-        </paper-button>
-      </template>
+        <div class="errorRegistro">[[mensaje]]</div>
+        <!-- Iniciar sesión -->
+        <form  hidden$="[[!noSignUp]]">
+            <paper-input id="emailInput" type="email" label="Email" value="{{email}}" validator="email-validator" error-message="Dirección email incorrecta" required auto-validate></paper-input>
+            <paper-input id="pwInput" type="password" label="Contraseña" value="{{password}}" required></paper-input>
+            <paper-button id="emailSignIn" raised type="submit" on-tap="_signInEmail">Ingresar</paper-button>
+            <p><a href="#" id="reset" on-click="_resetPassword">¿Olvidaste tu contraseña?</a></p>            
+        </form>
+          <!-- Registro -->
+        <form on-submit="_signUpMail" hidden$="[[noSignUp]]">
+              <!-- <paper-input label="Nombre de Usuario"></paper-input>
+              <paper-input label="Nombre y Apellido"></paper-input> -->
+              <paper-input id="emailInput" type="email" label="Email" value="{{email}}" validator="email-validator" error-message="Dirección email incorrecta" required auto-validate autocomplete="on"></paper-input>
+              <paper-input id="pwInput" type="password" label="Contraseña" value="{{password}}" required></paper-input>
+              <paper-input id="pwInput" type="password" label="Confirmar Contraseña" value="{{cpassword}}" required hidden$="[[noSignUp]]" ></paper-input>
+              <paper-button id="emailSignUp"  raised type="submit" on-tap="_signUpMail" hidden$="[[noSignUp]]">Registrarse</paper-button>
+        </form>
+
+        <hr>
+        <p>ó <span hidden$="[[!noSignUp]]">Inicia sesión </span> <span hidden$="[[noSignUp]]">Regístrate </span> con </p>
+          
+        <template is="dom-if" if="{{twitter}}">
+          <paper-button id="twitter" on-tap="_signIn" >
+                <svg   class="svg" xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
+                  <g>
+                    <ellipse cy="24" cx="24" ry="24" rx="24" fill="#308DBD" />
+                    <path id="path1" transform="rotate(0,24,24) translate(11,15.2741569876671) scale(0.8125,0.8125)  " fill="#FFFFFF" d="M22.154999,0C24.042999,-1.7628554E-07 25.749008,0.65798962 26.947006,1.7119909 28.442001,1.4689947 29.848007,1.0179904 31.115997,0.39599609 30.626007,1.662995 29.585007,2.724992 28.229004,3.3959822 29.557007,3.2650008 30.822998,2.9739849 32,2.5419931 31.119995,3.6299912 30.007004,4.5850088 28.723999,5.3489863 28.737,5.581988 28.742996,5.8159968 28.742996,6.0510127 28.742996,13.215994 22.139008,21.478999 10.063995,21.478999 6.3560028,21.478999 2.9059982,20.581018 0,19.042016 0.51399994,19.092004 1.0370026,19.118005 1.5660019,19.118005 4.6419983,19.118005 7.4729996,18.251001 9.7189941,16.796991 6.8470001,16.753015 4.4220047,15.184989 3.586998,13.030996 3.987999,13.094992 4.3990021,13.128988 4.8219986,13.128988 5.4209976,13.128988 6.0009995,13.062002 6.5510025,12.938009 3.5480042,12.439993 1.2850037,10.249013 1.2850037,7.6219975 1.2850037,7.5989873 1.2850037,7.5760075 1.2860031,7.5540044 2.1709976,7.9600102 3.1839981,8.2029917 4.2600021,8.2320139 2.4980011,7.2589909 1.3390045,5.5999934 1.3390045,3.7180037 1.3390045,2.724992 1.663002,1.7929999 2.2280045,0.99299669 5.4660034,4.2729971 10.302994,6.4309875 15.759995,6.6580078 15.647995,6.2610046 15.589996,5.8470027 15.589996,5.4219844 15.589996,2.4279947 18.529007,-1.7628554E-07 22.154999,0z" />
+                  </g>
+                </svg>
+            
+          </paper-button>
+        </template>
       
-      <template is="dom-if" if="{{github}}">
-        <paper-button on-tap="sigin" >
-        github
-        </paper-button>
-      </template>
+        <template is="dom-if" if="{{github}}">
+          <paper-button id="github" on-tap="_signIn" >
+              <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
+                <g>
+                  <ellipse cy="24" cx="24" ry="24" rx="24" fill="#1C1C1C" />
+                  <path id="path1" transform="rotate(0,24,24) translate(11,11) scale(0.812500096857559,0.812500096857559)  " fill="#FFFFFF" d="M16.29,0a16.29,16.29,0,0,0-5.15,31.75c.81.15,1.11-.35,1.11-.79s0-1.41,0-2.77C7.7,29.18,6.74,26,6.74,26a4.31,4.31,0,0,0-1.81-2.38c-1.48-1,.11-1,.11-1a3.42,3.42,0,0,1,2.5,1.68,3.47,3.47,0,0,0,4.74,1.35,3.48,3.48,0,0,1,1-2.18C9.7,23.08,5.9,21.68,5.9,15.44a6.3,6.3,0,0,1,1.68-4.37,5.86,5.86,0,0,1,.16-4.31s1.37-.44,4.48,1.67a15.44,15.44,0,0,1,8.16,0c3.11-2.11,4.48-1.67,4.48-1.67A5.85,5.85,0,0,1,25,11.07a6.29,6.29,0,0,1,1.67,4.37c0,6.26-3.81,7.63-7.44,8a3.89,3.89,0,0,1,1.11,3c0,2.18,0,3.93,0,4.47s.29.94,1.12.78A16.29,16.29,0,0,0,16.29,0Z" />
+                </g>
+              </svg>   
+              
+          </paper-button>
+        </template>
 
-      <template is="dom-if" if="{{anonymous}}">
-        <paper-button on-tap="sigin" >
-          anonymous
-        </paper-button>
-      </template>
+        <template is="dom-if" if="{{anonymous}}">
+          <paper-button id="anonymous" on-tap="_signIn" >
+              <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
+                <g>
+                  <ellipse cy="24" cx="24" ry="24" rx="24" fill="#1C1C1C" />
+                  <path id="path1" transform="rotate(0,24,24) translate(12.5096250187904,11) scale(0.812500096857559,0.812500096857559)  " fill="#FFFFFF" d="M10.245006,14.189109L10.345004,14.289108C11.544,15.388116,12.843002,16.087127,14.141996,16.087127L14.242002,16.087127C15.440998,16.087127,16.739991,15.388116,18.038995,14.289108L18.138991,14.189109C18.138991,14.189109 19.837987,15.78812 23.833983,17.187133 29.829978,19.485149 28.030976,28.578221 28.030976,28.578221 27.830979,29.57723 27.730983,29.977233 27.630984,29.977233 21.635989,32.674253 6.6480107,32.674253 0.65301627,29.977233 0.5530178,29.977233 0.45301947,29.57723 0.25301907,28.578221 0.25301898,28.478221 -1.5459783,19.385148 4.4500155,17.187133 8.5460033,15.78812 10.245006,14.189109 10.245006,14.189109z M14.141996,10.792088C14.940999,10.792088 15.540997,11.391091 15.540997,12.190093 15.540997,12.990102 14.940999,13.589106 14.141996,13.589106 13.343001,13.589106 12.743004,12.990102 12.743004,12.190093 12.743004,11.49109 13.343001,10.792088 14.141996,10.792088z M14.141996,0C16.040996,0 17.638993,1.5990114 17.638993,3.4970285 17.638993,5.496041 16.439998,6.3950502 15.640994,6.895054 15.440998,6.995053 15.341,7.0940568 15.240994,7.1940562L15.240994,8.6930677C15.240994,9.293071 14.742002,9.7920791 14.141996,9.7920791 13.541999,9.7920791 13.042998,9.293071 13.042998,8.6930677L13.042998,7.0940568C13.042998,5.9950454 13.842001,5.496041 14.441998,5.0960399 15.040997,4.6960356 15.440998,4.3970334 15.440998,3.4970285 15.440998,2.798022 14.841001,2.198019 14.141996,2.1980187 13.443,2.198019 12.843002,2.798022 12.843002,3.4970285 12.843002,4.0970318 12.343002,4.5960361 11.744004,4.5960361 11.144007,4.5960361 10.645007,4.0970318 10.645007,3.4970285 10.645007,1.5990114 12.243004,0 14.141996,0z" />
+                </g>
+              </svg>     
+          </paper-button>
+        </template>
 
-       <template is="dom-if" if="{{facebook}}">
-        <paper-button on-tap="sigin" >
-          facebook
-        </paper-button>
-      </template>
+        <template is="dom-if" if="{{facebook}}">
+          <paper-button id="facebook" on-tap="_signIn" >
+              <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
+                <g>
+                  <ellipse cy="24" cx="24" ry="24" rx="24" fill="#223DB6" />
+                  <path id="path1" transform="rotate(0,24,24) translate(11.1417816281319,11) scale(0.8125,0.8125)  " fill="#FFFFFF" d="M1.6459961,0L30.005003,0C30.913999,0,31.650999,0.81900024,31.650999,1.8289948L31.650999,30.170998C31.650999,31.181999,30.913999,32,30.005003,32L21.817991,32 21.817991,18.851997 25.751982,18.851997 25.751982,14.581001 21.817991,14.581001 21.817991,13.150002C21.817991,12.110001,22.645994,11.266998,23.670988,11.266998L25.751982,11.266998 25.751982,6.9980011 21.246977,6.9980011C18.509979,6.9980011,16.291992,9.2490005,16.291992,12.027L16.291992,14.581001 12.742003,14.581001 12.742003,18.851997 16.291992,18.851997 16.291992,32 1.6459961,32C0.73699956,32,7.5509888E-08,31.181999,0,30.170998L0,1.8289948C7.5509888E-08,0.81900024,0.73699956,0,1.6459961,0z" />
+                </g>
+              </svg>
+          </paper-button>
+        </template>
 
-
+        <template is="dom-if" if="{{google}}">
+          <paper-button id="google" on-tap="_signIn" >
+              <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
+                <g>
+                  <ellipse cy="24" cx="24" ry="24" rx="24" fill="#D51313" />
+                  <path id="path1" transform="rotate(0,24,24) translate(11,11.0004060268402) scale(0.8125,0.8125)  " fill="#FFFFFF" d="M10.70697,21.429998C10.953003,21.429998 11.075989,21.429998 11.271973,21.453009 13.127014,22.753012 13.932007,23.401998 13.932007,24.632009 13.932007,26.125006 12.687988,27.238012 10.339966,27.238012 7.7260132,27.238012 6.0410156,26.007009 6.0410156,24.297003 6.0410156,22.586004 7.6010132,22.009008 8.1409912,21.815008 9.1679688,21.476004 10.487,21.429998 10.70697,21.429998z M22.130981,14.769001L22.130981,18.450001 18.461975,18.450001 18.461975,20.960012 22.130981,20.960012 22.130981,24.615011 24.620972,24.615011 24.620972,20.960012 28.307983,20.960012 28.307983,18.450001 24.620972,18.450001 24.620972,14.769001z M9.5100098,10.679996C11.537964,10.679996 12.588013,13.378009 12.588013,15.118 12.588013,15.547001 12.539001,16.315998 11.981018,16.871998 11.586975,17.257008 10.930969,17.550007 10.315002,17.550007 8.21698,17.550007 7.2559814,14.871998 7.2559814,13.257007 7.2559814,12.632007 7.3829956,11.979999 7.7969971,11.479999 8.190979,10.992007 8.875,10.679996 9.5100098,10.679996z M11.049011,9.8690061C9.7319946,9.8690061 8.065979,10.069003 6.6779785,11.205005 5.6229858,12.091006 5.1069946,13.325 5.1069946,14.435001 5.1069946,16.315006 6.5789795,18.222004 9.1679688,18.222004 9.4129639,18.222004 9.6809692,18.19701 9.9539795,18.174 9.8289795,18.466007 9.7059937,18.709003 9.7059937,19.11301 9.7059937,19.863012 10.096008,20.319006 10.440002,20.750006 9.3380127,20.825003 7.2849731,20.947012 5.7749634,21.860998 4.3289795,22.705999 3.8880005,23.937002 3.8880005,24.802008 3.8880005,26.586004 5.5969849,28.247002 9.1409912,28.247002 13.343994,28.247002 15.56897,25.957998 15.56897,23.692999 15.56897,22.034002 14.593994,21.211004 13.518982,20.319006L12.640991,19.643009C12.370972,19.429996 12,19.138004 12,18.608997 12,18.082005 12.370972,17.740009 12.687988,17.425007 13.714966,16.634006 14.742981,15.746998 14.742981,13.965 14.742981,12.132007 13.565002,11.205005 13.003967,10.668002L14.518005,10.668002 16.083984,9.8690061z M0,7.3840046L32,7.3840046 32,25.730001C32,29.17701,29.177979,31.999001,25.729004,31.999001L6.2719727,31.999001C2.822998,31.999001,0,29.17701,0,25.730001z M6.2719727,0L25.729004,0C29.086975,2.0349034E-08,31.828979,2.6799934,31.971985,6.0000014L0.028015137,6.0000014C0.17199707,2.6799934,2.9140015,2.0349034E-08,6.2719727,0z" />
+                </g>
+              </svg>
+              
+              
+          </paper-button>
+        </template>
+        <hr>
+        <span hidden$="[[noSignUp]]">¿Ya tienes cuenta? <a href="#" on-click="_toogle">Inicia Sesión</a> </span>
+        <span hidden$="[[!noSignUp]]">¿Aún no tienes cuenta? <a href="#" on-click="_toogle">Regístrate aquí</a></span>
   </template>
 
   <script>
@@ -50,117 +114,174 @@
      */
     class YoLogin extends Polymer.Element {
       static get is() { return 'yo-login'; }
+      constructor() {
+        super();
+      }
       static get properties() {
         return {
-            /**
-          * `appName` represents the name of the firebase-app that was instantiated
-          */
           appName: {
-          type: String
+            type: String
           },
-          /**
-          * `anonymous` represents whether to allow anonymous sign in
-          */
           anonymous: {
-          type: Boolean,
-          value: false,
+            type: Boolean,
+            value: false,
           },
-          /**
-          * `github` represents whether to allow github sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
-          */
           github: {
-          type: Boolean,
-          value: false,
+            type: Boolean,
+            value: false,
           },
-          /**
-          * `twitter` represents whether to allow twitter sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
-          */
           twitter: {
-          type: Boolean,
-          value: false,
+            type: Boolean,
+            value: false,
           },
-          /**
-          * `facebook` represents whether to allow facebook sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
-          */
           facebook: {
-          type: Boolean,
-          value: false,
+            type: Boolean,
+            value: false,
           },
-          /**
-          * `google` represents whether to allow google sign in. See the [firebase console](https://console.firebase.google.com) Auth tab for configuration
-          */
           google: {
-          type: Boolean,
-          value: false,
+            type: Boolean,
+            value: false,
           },
-          /**
-          * `redirect` represents whether to use a redirect instead of a popup for signing in with the selected providers
-          */
+          provider:{
+            type:String,
+            value:""
+          },
           redirect: {
           type: Boolean,
           value: false,
           },
-          /**
-          * `horizontal` represents whether to display the social buttons side by side or on top of each other
-          */
-          horizontal: {
-          type: Boolean,
-          value: false,
-          observer: '_horizontalChanged',
+          noSignUp:{
+            type: Boolean,
+            value: true
           },
-          /**
-          * `mini` represents whether to display the social buttons with "Sign in with" or not
-          */
-          mini: {
-          type: Boolean,
-          value: false
-          },
-          /**
-          * `user` represents the user object returned by the firebase-auth element
-          */
           user: {
-          type: Object,
-          readOnly: true,
-          notify: true,
-          computed: "_computeUser(googleUser, facebookUser, twitterUser, githubUser, anonUser)",
-          observer: "_userChanged",
+            type: Object,
+            readOnly: true,
+            notify: true,
+            computed: "_computeUser(googleUser, facebookUser, twitterUser, githubUser, anonUser)",
+            observer: "_userChanged",
           },
-          /**
-          * `signedIn` represents the signed in state returned by the firebase-auth element
-          */
           signedIn: {
-          type: Boolean,
-          readOnly: true,
-          notify: true,
-          computed: "_computeSignedIn(googleSignedIn, facebookSignedIn, twitterSignedIn, githubSignedIn, anonSignedIn)",
+            type: Boolean,
+            readOnly: true,
+            notify: true,
+            computed: "_computeSignedIn(googleSignedIn, facebookSignedIn, twitterSignedIn, githubSignedIn, anonSignedIn)",
           },
-          /**
-          * `statusKnown` represents the status known state returned by the firebase-auth element
-          */
           statusKnown: {
             type: Boolean,
             notify: true,
             computed: "_computeStatusKnown(googleStatusKnown, facebookStatusKnown, twitterStatusKnown, githubStatusKnown, anonStatusKnown)",
           },
-          /**
-          * `debug` represents if the debug region is shown
-          */
           debug: {
-          type: Boolean,
-          value: false,
+            type: Boolean,
+            value: false,
           }
         };
 
       }
-      sigin(){
-        this.$.auth.signInWithPopup()
-        .then(function(response) {// successful authentication response here
-          console.log("sigin", response);  
-        })
-        .catch(function(error) {// unsuccessful authentication response here
-          console.log("error",error);
+      _resetPassword(){
+        var that = this;
+        if(this.email){
+          this.$.auth.sendPasswordResetEmail(this.email)
+            .then(function () {
+              that.mensaje = "Unmensaje se ha enviado a: " + that.email + ". Por favor revise su correo" ;
+            })
+            .catch(function(e){
+              if (that.debug) console.log(e);
+              switch(e.code){
+                case "auth/user-not-found":
+                  that.mensaje = `No hay registro de usuario correspondiente a este identificador.`;
+                  break;
+                case "auth/internal-error":
+                  that.mensaje = `Restablecer password: ha excedido el limite de notificaciónes intente en 1 hora`;
+                  break;
+                defalult:
+                  that.mensaje = e.message;
+              }
+            })
+            ;
+        } else {
+          this.mensaje = "Por favor ingrese una dirección de correo valida.";
+        }
+      }
+      _toogle(){
+          this.noSignUp = !this.noSignUp ;
+          this.mensaje = "";
+      }
+      _signUpMail(e){
+        var that = this;
+        this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
+          .then(function(e){
+           if(that.debug) console.log("creado:",e);
+          })
+          .catch(function(e){
+            switch(e.code){
+                case "auth/email-already-in-use":
+                  that.mensaje = "la direción de email ya esta siendo utilizada por otra cuenta";
+                break;
+                default:
+                  that.mensaje = e.message;
+            }
+          })
+      }
+      _signInEmail(e){
+        var that = this;
+        this.$.auth.signInWithEmailAndPassword(this.email,this.password)
+          .then(function(e){
+            if (that.debug) console.log("usuario autenticado",e);
+            that.mensaje = "";
+          })
+          .catch(function(e){
+            if (that.debug) console.log("error de autenticacion",e);
+            switch(e.code){
+              case "auth/wrong-password":
+                that.mensaje = "La contraseña no es válida o el usuario no tiene una contraseña.";
+                break;
+              case "auth/user-not-found":
+                that.mensaje = `No hay registro de usuario correspondiente a este identificador.`;
+                break;
+              case "auth/argument-error":
+                that.mensaje = "Revisa la información de los campos";
+                break;
+              case "auth/user-disabled":
+                that.mensaje = "Esta cuenta ha sido deshabilitada por el administrador";
+                break;
+              defalult:
+                that.mensaje = e.message;
+            }
         });
       }
+      _signIn(e){
+          var that = this;
+          this.provider= e.currentTarget.id;
+          if(e.currentTarget.id == "anonymous")
+          {
+            this.$.auth.signInAnonymously()
+            .then(function(e) {
+              if (that.debug) console.log("sigin", e);  
+            })
+            .catch(function(e) {
+              if (that.debug) console.log("error",e);
+            });
+          }
+          else {
+            this.$.auth.signInWithPopup(e.currentTarget.id)
+            .then(function(response) {
+              if (that.debug) console.log("sigin", e);  
+            })
+            .catch(function(e) {
+              if (that.debug) console.log("error",e);
+              switch(e.code){
+                case "auth/internal-error":
+                  that.mensaje = "Error interno del servidor. posible causa cuenta deshabilitada"
+                  break;
+                default:
+                  that.mensaje = e.message;
+              }
+            });
+          }
+          
+        }
     }
     window.customElements.define(YoLogin.is, YoLogin);
   </script>
