@@ -3,6 +3,16 @@
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../polymerfire/firebase-auth.html">
 
+<!-- 
+  Ejemplo de Uso:
+<firebase-app auth-domain="polymerfire-test.firebaseapp.com"
+  database-url="https://polymerfire-test.firebaseio.com/"
+  api-key="AIzaSyDTP-eiQezleFsV2WddFBAhF_WEzx_8v_g">
+</firebase-app>
+
+ <yo-login twitter facebook github google anonymous app-name="yologin" debug></yo-login>
+
+ -->
 <dom-module id="yo-login">
   <template>
     <style>
@@ -16,10 +26,32 @@
         color: red;
       }
     </style>
-        <firebase-auth app-name="{{appName}}" id="auth" user="{{user}}" provider="{{provider}}"  sign>
+    
+        <firebase-auth 
+          app-name="{{appName}}" 
+          id="auth" 
+          user="{{user}}" 
+          provider="{{provider}}"  
+          signed-in="{{signedIn}}" 
+          status-known={{statusKnown}}>
         </firebase-auth>
-
-        <div class="errorRegistro">[[mensaje]]</div>
+        <!-- Debug -->
+        <template is="dom-if" if={{debug}}>
+            <div class="debug">
+              <div> user.id = {{user.uid}}</div>
+              <div> signedIn = {{signedIn}}</div>
+              <div> statusKnown = {{statusKnown}}</div>
+              <div> user.displayName = {{user.displayName}}</div>
+              <div> user.email = {{user.email}}</div>
+              <div> user.emailVerified = {{user.emailVerified}}</div>
+              <div> user.isAnonymous = {{user.isAnonymous}}</div>
+              <div> user.photoURL = {{user.photoURL}} <img src$="{{user.photoURL}}" hidden="{{!user.photoURL}}" width="100px" height="100px"> </div>
+              <div> user.providerId = {{user.providerId}}</div>
+              <paper-button on-tap="signOut">Log Out</paper-button>
+            </div>
+          </template>
+       
+          <div class="errorRegistro">[[mensaje]]</div>
         <!-- Iniciar sesión -->
         <form  hidden$="[[!noSignUp]]">
             <paper-input id="emailInput" type="email" label="Email" value="{{email}}" validator="email-validator" error-message="Dirección email incorrecta" required auto-validate></paper-input>
@@ -36,10 +68,8 @@
               <paper-input id="pwInput" type="password" label="Confirmar Contraseña" value="{{cpassword}}" required hidden$="[[noSignUp]]" ></paper-input>
               <paper-button id="emailSignUp"  raised type="submit" on-tap="_signUpMail" hidden$="[[noSignUp]]">Registrarse</paper-button>
         </form>
-
         <hr>
-        <p>ó <span hidden$="[[!noSignUp]]">Inicia sesión </span> <span hidden$="[[noSignUp]]">Regístrate </span> con </p>
-          
+        <p>ó <span hidden$="[[!noSignUp]]">Inicia sesión </span> <span hidden$="[[noSignUp]]">Regístrate </span> con </p> 
         <template is="dom-if" if="{{twitter}}">
           <paper-button id="twitter" on-tap="_signIn" >
                 <svg   class="svg" xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
@@ -51,7 +81,7 @@
             
           </paper-button>
         </template>
-      
+        <!-- Proveedores sociales -->
         <template is="dom-if" if="{{github}}">
           <paper-button id="github" on-tap="_signIn" >
               <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
@@ -63,7 +93,6 @@
               
           </paper-button>
         </template>
-
         <template is="dom-if" if="{{anonymous}}">
           <paper-button id="anonymous" on-tap="_signIn" >
               <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
@@ -74,7 +103,6 @@
               </svg>     
           </paper-button>
         </template>
-
         <template is="dom-if" if="{{facebook}}">
           <paper-button id="facebook" on-tap="_signIn" >
               <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
@@ -85,7 +113,6 @@
               </svg>
           </paper-button>
         </template>
-
         <template is="dom-if" if="{{google}}">
           <paper-button id="google" on-tap="_signIn" >
               <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48" viewBox="0 0 48 48">
@@ -147,30 +174,37 @@
             value:""
           },
           redirect: {
-          type: Boolean,
-          value: false,
+            type: Boolean,
+            value: false,
           },
           noSignUp:{
             type: Boolean,
             value: true
           },
+          /**
+           * The currently-authenticated user with user-related metadata. See
+           * the [`firebase.User`](https://firebase.google.com/docs/reference/js/firebase.User)
+           * documentation for the spec.
+           */
           user: {
             type: Object,
-            readOnly: true,
-            notify: true,
-            computed: "_computeUser(googleUser, facebookUser, twitterUser, githubUser, anonUser)",
-            observer: "_userChanged",
+            reflectToAttribute: true,
+            notify: true
           },
+          /**
+           * True if the client is authenticated, and false if the client is not
+           * authenticated.
+           */
           signedIn: {
             type: Boolean,
-            readOnly: true,
-            notify: true,
-            computed: "_computeSignedIn(googleSignedIn, facebookSignedIn, twitterSignedIn, githubSignedIn, anonSignedIn)",
+            notify: true
           },
+          /**
+           * When true, login status can be determined by checking `user` property.
+           */
           statusKnown: {
             type: Boolean,
-            notify: true,
-            computed: "_computeStatusKnown(googleStatusKnown, facebookStatusKnown, twitterStatusKnown, githubStatusKnown, anonStatusKnown)",
+            notify: true
           },
           debug: {
             type: Boolean,
@@ -203,7 +237,7 @@
         } else {
           this.mensaje = "Por favor ingrese una dirección de correo valida.";
         }
-      }
+      }v
       _toogle(){
           this.noSignUp = !this.noSignUp ;
           this.mensaje = "";
@@ -213,6 +247,13 @@
         this.$.auth.createUserWithEmailAndPassword(this.email, this.password)
           .then(function(e){
            if(that.debug) console.log("creado:",e);
+           // TODO: Revisar esta implementacion
+           that.user.sendEmailVerification().then(function() {
+                // Email sent.
+                console.log("email enviado")
+              }, function(error) {
+                console.log("error de email enviado", error);
+              });
           })
           .catch(function(e){
             switch(e.code){
@@ -252,6 +293,7 @@
         });
       }
       _signIn(e){
+          this.mensaje = "";
           var that = this;
           this.provider= e.currentTarget.id;
           if(e.currentTarget.id == "anonymous")
@@ -266,14 +308,17 @@
           }
           else {
             this.$.auth.signInWithPopup(e.currentTarget.id)
-            .then(function(response) {
+            .then(function(e) {
               if (that.debug) console.log("sigin", e);  
             })
             .catch(function(e) {
               if (that.debug) console.log("error",e);
               switch(e.code){
                 case "auth/internal-error":
-                  that.mensaje = "Error interno del servidor. posible causa cuenta deshabilitada"
+                  that.mensaje = "Error interno del servidor. posible causa cuenta deshabilitada";
+                  break;
+                case "auth/account-exists-with-different-credential":
+                  that.mensaje = "Una cuenta ya existe con la misma dirección de correo electrónico pero con diferentes credenciales de inicio de sesión. Inicie sesión con un proveedor asociado con esta dirección de correo electrónico.";
                   break;
                 default:
                   that.mensaje = e.message;
@@ -281,7 +326,20 @@
             });
           }
           
-        }
+      }
+      signOut(){
+        var that = this;
+        if (that.debug) console.log('signedIn', this.signedIn)
+        if(this.signedIn){this.$.auth.signOut()
+          .then(function(e){
+            if (that.debug) console.log('signOut', e)
+          })
+          .catch(function(){
+            if (that.debug) console.log('Error signOut', e)
+          })
+          ;}
+      }
+    
     }
     window.customElements.define(YoLogin.is, YoLogin);
   </script>
